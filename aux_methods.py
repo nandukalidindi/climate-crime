@@ -9,4 +9,4 @@ def get_pincode(lat, lng):
 	flatten = [item for sublist in address_components for item in sublist]
 	postal_objects = list(filter(lambda x: x["types"] == ["postal_code"], flatten))
 	postal_codes = list(map(lambda x: x["long_name"], postal_objects))
-	return postal_codes[0];
+	return str(postal_codes[0])
