@@ -20,7 +20,7 @@ def crime_date_convert(date, time):
 
 udf_crime_date_convert = udf(crime_date_convert, StringType())
 
-with_climate_date_conversion = crime_df_date.withColumn("normalized_date", udf_crime_date_convert("CMPLNT_FR_DT", "CMPLNT_FR_TM")).select("normalized_date", "OFNS_DESC", "LAW_CAT_CD", "Latitude", "Longitude", "PD_DESC")
+with_crime_date_conversion = crime_df_date.withColumn("normalized_date", udf_crime_date_convert("CMPLNT_FR_DT", "CMPLNT_FR_TM")).select("normalized_date", "OFNS_DESC", "LAW_CAT_CD", "Latitude", "Longitude", "PD_DESC")
 
 
 
@@ -33,4 +33,23 @@ udf_climate_date_convert = udf(climate_date_convert, StringType())
 
 climate_with_date_conversion = climate_df_date.withColumn("normalized_date", udf_climate_date_convert("DATE")).select("normalized_date", "HOURLYDRYBULBTEMPC")
 
-join_climate_crime = climate_with_date_conversion.join(with_climate_date_conversion, "normalized_date")
+join_climate_crime = climate_with_date_conversion.join(with_crime_date_conversion, "normalized_date")
+
+cleaned_join_climate_crime = join_climate_crime.na.drop()
+
+
+def get_hour(date):
+	return date.split(" ")[1]
+
+def get_date(date):
+	return date.split(" ")[0]
+
+
+udf_get_hour = udf(get_hour, StringType())
+
+udf_get_date = udf(get_date, StringType())
+
+
+with_refined_date_columns = cleaned_join_climate_crime.withColumn("date", udf_get_date("normalized_date")).withColumn("hour", udf_get_hour("normalized_date"))
+
+
